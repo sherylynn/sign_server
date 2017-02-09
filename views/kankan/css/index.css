@@ -1,0 +1,29 @@
+img {
+	width:100%
+}
+
+@media screen and (min-width: 320px) and (max-width: 480px){
+
+}
+@media (min-resolution: 192dpi), (-webkit-min-device-pixel-ratio: 2), (min--moz-device-pixel-ratio: 2), (-o-min-device-pixel-ratio: 2/1), (min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+	/*All your high resolution styles go here*/
+}
+
+/* 把所有的屏幕都不留空*/
+/*
+@media only screen and (min-width: 1080px),(max-resolution: 96dpi), (-webkit-max-device-pixel-ratio: 1.5), (max--moz-device-pixel-ratio: 1.5), (-o-max-device-pixel-ratio: 3/2), (max-device-pixel-ratio: 1.5), (max-resolution: 1.5dppx) {
+	#all {width:595;margin:auto}
+}
+*/
+/*
+@media only screen and (min-width: 700px) and (-Webkit-max-device-pixel-ratio: 1.5){
+	#all {width:595;margin:auto}
+}
+
+@media only screen and (-Webkit-max-device-pixel-ratio: 1.5) {
+    #all {width:595;margin:auto}
+}
+@media only screen and (-Webkit-min-device-pixel-ratio: 1.5) {
+
+}
+*/

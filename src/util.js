@@ -11,6 +11,10 @@ var crypto = require('crypto');
 var fs = require('fs');
 module.exports = {
 
+  time: function(){
+    return new Date().toLocaleString()
+  },
+
   guid: function() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
       var r = Math.random() * 16 | 0,

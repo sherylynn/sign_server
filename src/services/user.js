@@ -694,29 +694,58 @@ var User = {
 
   },
 
-  //用户修改密码
-  updatePassword: function (req, res) {
-    var token = req.body.token;
-    var oldPassword = util.md5(req.body.oldPassword);
-    var password = util.md5(req.body.password);
-
-    var content = JSON.parse(fs.readFileSync(USER_PATH));
-    for (var i in content) {
-      if (token === content[i].token && oldPassword === content[i].password) {
-        content[i].password = password;
-        //写入到文件中
-        fs.writeFileSync(USER_PATH, JSON.stringify(content));
+  //用户修改密码 //fix
+  updatePassword: async function (req, res) {
+    let db_user = new PouchDB(db);
+    let email = req.body.email;
+    let token = req.body.token;
+    let oldPassword = util.md5(req.body.oldPassword);
+    let newPassword = util.md5(req.body.password);
+    let token_passwd_index = await db_user.createIndex({
+      index: {
+        fields: ['token','email','password']
+      }
+    });
+    try{
+      let token_passwd =await db_user.find({
+        selector: {
+          token:token,
+          email:email,
+          password:oldPassword
+        }
+      })
+      if (token_passwd['docs'].length > 0) {
+        let time = new Date().toLocaleString();
+        let doc = await db_user.get(email);
+        let response = await db_user.put({
+          _id: email,
+          _rev: doc._rev,
+          email: email,
+          password: newPassword,
+          username: doc['username'],
+          token: token,
+          reg_time: doc['reg_time'],
+          log_time: time
+        });
+        console.log(token_passwd);
         return res.send({
           status: 1,
-          data: '更新成功'
+          data: token_passwd['docs'][0]
         });
+      } else {
+        return res.send({
+          status: 0,
+          data: '更新失败，没有找到该用户或者初始密码错误'
+        })
       }
-    }
 
-    return res.send({
-      status: 0,
-      data: '更新失败，没有找到该用户或者初始密码错误'
-    });
+    } catch (err) {
+      console.log(err);
+      return res.send({
+        status: 0,
+        data: '远程错误'
+      });
+    }
   },
 
   //删除用户

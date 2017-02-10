@@ -1,6 +1,6 @@
 'use strict';
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var fs = require('fs');
 var util = require('./../util');
@@ -39,7 +39,7 @@ var User = {
     app.post('/user/delete', this.deleteUser);
   },
   addUser_auth: (() => {
-    var ref = _asyncToGenerator(function* (req, res) {
+    var _ref = _asyncToGenerator(function* (req, res) {
       console.log(req.body);
       var username = req.body.username;
       var password = util.md5(req.body.password);
@@ -91,11 +91,11 @@ var User = {
     });
 
     return function addUser_auth(_x, _x2) {
-      return ref.apply(this, arguments);
+      return _ref.apply(this, arguments);
     };
   })(),
   login_auth: (() => {
-    var ref = _asyncToGenerator(function* (req, res) {
+    var _ref2 = _asyncToGenerator(function* (req, res) {
       var email = req.body.email;
       var password = util.md5(req.body.password);
       var deviceId = req.body.deviceId;
@@ -220,7 +220,7 @@ var User = {
     });
 
     return function login_auth(_x3, _x4) {
-      return ref.apply(this, arguments);
+      return _ref2.apply(this, arguments);
     };
   })(),
   destroyUser: function (req, res) {
@@ -275,7 +275,7 @@ var User = {
 
   //添加用户
   addUser: (() => {
-    var ref = _asyncToGenerator(function* (req, res) {
+    var _ref3 = _asyncToGenerator(function* (req, res) {
       var db_user = new PouchDB(db);
       console.log(req.body);
       var username = req.body.username;
@@ -410,7 +410,7 @@ var User = {
               });
             })
           }
-         })
+          })
         */
       }
       /*
@@ -510,13 +510,13 @@ var User = {
     });
 
     return function addUser(_x5, _x6) {
-      return ref.apply(this, arguments);
+      return _ref3.apply(this, arguments);
     };
   })(),
 
   //用户登录
   login: (() => {
-    var ref = _asyncToGenerator(function* (req, res) {
+    var _ref4 = _asyncToGenerator(function* (req, res) {
       var db_user = new PouchDB(db);
       var email = req.body.email;
       var password = util.md5(req.body.password);
@@ -647,13 +647,13 @@ var User = {
     });
 
     return function login(_x7, _x8) {
-      return ref.apply(this, arguments);
+      return _ref4.apply(this, arguments);
     };
   })(),
 
   //通过token登录
   loginByToken: (() => {
-    var ref = _asyncToGenerator(function* (req, res) {
+    var _ref5 = _asyncToGenerator(function* (req, res) {
       var db_user = new PouchDB(db);
       var token = req.body.token;
       var r_index = yield db_user.createIndex({
@@ -716,34 +716,68 @@ var User = {
     });
 
     return function loginByToken(_x9, _x10) {
-      return ref.apply(this, arguments);
+      return _ref5.apply(this, arguments);
     };
   })(),
 
-  //用户修改密码
-  updatePassword: function (req, res) {
-    var token = req.body.token;
-    var oldPassword = util.md5(req.body.oldPassword);
-    var password = util.md5(req.body.password);
-
-    var content = JSON.parse(fs.readFileSync(USER_PATH));
-    for (var i in content) {
-      if (token === content[i].token && oldPassword === content[i].password) {
-        content[i].password = password;
-        //写入到文件中
-        fs.writeFileSync(USER_PATH, JSON.stringify(content));
+  //用户修改密码 //fix
+  updatePassword: (() => {
+    var _ref6 = _asyncToGenerator(function* (req, res) {
+      let db_user = new PouchDB(db);
+      let email = req.body.email;
+      let token = req.body.token;
+      let oldPassword = util.md5(req.body.oldPassword);
+      let newPassword = util.md5(req.body.password);
+      let token_passwd_index = yield db_user.createIndex({
+        index: {
+          fields: ['token', 'email', 'password']
+        }
+      });
+      try {
+        let token_passwd = yield db_user.find({
+          selector: {
+            token: token,
+            email: email,
+            password: oldPassword
+          }
+        });
+        if (token_passwd['docs'].length > 0) {
+          let time = new Date().toLocaleString();
+          let doc = yield db_user.get(email);
+          let response = yield db_user.put({
+            _id: email,
+            _rev: doc._rev,
+            email: email,
+            password: newPassword,
+            username: doc['username'],
+            token: token,
+            reg_time: doc['reg_time'],
+            log_time: time
+          });
+          console.log(token_passwd);
+          return res.send({
+            status: 1,
+            data: token_passwd['docs'][0]
+          });
+        } else {
+          return res.send({
+            status: 0,
+            data: '更新失败，没有找到该用户或者初始密码错误'
+          });
+        }
+      } catch (err) {
+        console.log(err);
         return res.send({
-          status: 1,
-          data: '更新成功'
+          status: 0,
+          data: '远程错误'
         });
       }
-    }
-
-    return res.send({
-      status: 0,
-      data: '更新失败，没有找到该用户或者初始密码错误'
     });
-  },
+
+    return function updatePassword(_x11, _x12) {
+      return _ref6.apply(this, arguments);
+    };
+  })(),
 
   //删除用户
   deleteUser: function (req, res) {

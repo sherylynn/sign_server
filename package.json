@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "build": "node node_modules/babel-cli/bin/babel src --out-dir routes"
+    "build": "./node_modules/.bin/babel src -d routes && ./node_modules/.bin/babel views/js/src -d views/js/bundle"
   },
   "dependencies": {
     "async": "^2.0.0-rc.5",
@@ -17,11 +17,10 @@
     "express": "~4.12.0",
     "express-pouchdb": "^1.0.3",
     "pouchdb-find": "^0.9.0",
-    "pouchdb-auth": "^2.0.1",
+    "pouchdb-auth": "~2.0.1",
     "j": "*",
     "json": "^9.0.3",
     "morgan": "~1.5.1",
-    "pouchdb-auth": "~2.0.1",
     "serve-favicon": "~2.2.0",
     "supervisor": "^0.7.1",
     "xss": "^0.2.7",
@@ -29,12 +28,14 @@
   },
   "devDependencies": {
     "babel-cli": "^6.8.0",
-    "babel-core": "^6.8.0",
+    "babel-core": "^6.22.1",
+    "babel-loader": "^6.2.10",
+    "babel-plugin-transform-async-to-generator": "^6.8.0",
     "babel-plugin-transform-es2015-destructuring": "^6.8.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.8.0",
     "babel-plugin-transform-es2015-parameters": "^6.8.0",
     "babel-plugin-transform-es2015-spread": "^6.8.0",
     "babel-plugin-transform-strict-mode": "^6.8.0",
-    "babel-plugin-transform-async-to-generator": "^6.8.0"
+    "webpack": "^2.2.1"
   }
 }

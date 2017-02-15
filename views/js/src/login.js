@@ -1,10 +1,8 @@
-import API from './api'
-//let path = API.host +API.login;
+import {API} from './api'
+let path = API.host +API.login;
 console.log(API);
 $(function () {
     const db_user_local= new PouchDB('user');
-    let path="http://192.168.0.249:3000/user/login"
-    
     console.log(path);
     $('#btn').on('click', function () {
         var email = $('#email').val();

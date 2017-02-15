@@ -4,7 +4,7 @@ var USER_PATH = './database/activity.json';
 var PouchDB = require('pouchdb');
 PouchDB.plugin(require('pouchdb-find')); //麻痹不兼容couchdb1.x
 
-import checkAdmin from './../checkAdmin'
+import {checkAdmin} from './../checkAdmin'
 let db_activity_url = 'http://localhost:3456/activity';
 let db_user_url ='http://localhost:3456/shit';
 /*

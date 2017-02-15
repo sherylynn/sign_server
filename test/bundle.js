@@ -68,82 +68,24 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return fuck; });
+let fuck =(sb)=>{
+  console.log(sb)
+}
 
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var API = {
-  //host: 'http://mh.kenx.cn:3000',
-  //host:'http://10.0.2.2:3000',//苹果的地址不一定相同,不能使用10.0.2.2:3000
-  //host:'http://192.168.0.249:3000',
-  host: 'http://192.168.0.249:3000',
-  login: '/user/login',
-  loginByToken: '/user/login/token',
-  getUser: '/user/get',
-  getkankanList: '/kankan/getList',
-  getkankan: 'kankan/get',
-  createUser: '/user/create',
-  getMessage: '/message/get',
-  addMessage: '/message/add',
-  getMakeup: '/makeup/get',
-  addMakeup: '/makeup/add',
-  updatePassword: '/user/password/update',
-  deleteUser: '/user/delete',
-  db: '/db/users'
-};
-exports.API = API;
 
 /***/ }),
 /* 1 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__fuck__ = __webpack_require__(0);
 
-
-var _api = __webpack_require__(0);
-
-let path = _api.API.host + _api.API.login;
-console.log(_api.API);
-$(function () {
-    const db_user_local = new PouchDB('user');
-    console.log(path);
-    $('#btn').on('click', function () {
-        var email = $('#email').val();
-        var password = $('#password').val();
-        var loginInfo = $(".login-info");
-        //必填验证
-        if (!email || !password) {
-            loginInfo.removeClass("hidden").text("注册邮箱或密码必须填写，不能为空！");
-            email.focus();
-            return;
-        }
-        //组装数据
-        var obj = {
-            email,
-            password,
-            deviceId: 'browser'
-        };
-        //登录请求
-        $.ajax({
-            type: 'POST',
-            url: path,
-            dataType: 'json',
-            data: obj
-        }).done(function (data) {
-            if (data.status) {
-                window.location.href = '/';
-            } else {
-                loginInfo.removeClass("hidden").text("注册邮箱或密码不正确，请重新登录！");
-            }
-        }).fail(function () {
-            loginInfo.removeClass("hidden").text("系统出现异常，稍后重试！");
-        });
-    });
-});
+__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__fuck__["a" /* fuck */])("you");
 
 /***/ })
 /******/ ]);

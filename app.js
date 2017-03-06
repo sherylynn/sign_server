@@ -1,4 +1,5 @@
 var express = require('express'),
+  cors= require('cors'),
   http = require('http'),
   https = require('https'),
   fs = require('fs'),
@@ -29,6 +30,7 @@ app.engine('md', function(path, options, fn) {
     fn(null, str);
   });
 });
+app.use(cors());
 app.use(favicon(__dirname + '/views/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());

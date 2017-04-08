@@ -86,6 +86,7 @@ var User = {
     }
   },
   login_auth: async function (req, res) {
+    console.log(req.body);
     var email = req.body.email;
     var password = util.md5(req.body.password);
     var deviceId = req.body.deviceId;

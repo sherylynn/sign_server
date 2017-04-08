@@ -96,6 +96,7 @@ var User = {
   })(),
   login_auth: (() => {
     var _ref2 = _asyncToGenerator(function* (req, res) {
+      console.log(res.body);
       var email = req.body.email;
       var password = util.md5(req.body.password);
       var deviceId = req.body.deviceId;

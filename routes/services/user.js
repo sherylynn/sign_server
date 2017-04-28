@@ -96,7 +96,7 @@ var User = {
   })(),
   login_auth: (() => {
     var _ref2 = _asyncToGenerator(function* (req, res) {
-      console.log(res.body);
+      console.log(req.body);
       var email = req.body.email;
       var password = util.md5(req.body.password);
       var deviceId = req.body.deviceId;
@@ -518,6 +518,7 @@ var User = {
   //用户登录
   login: (() => {
     var _ref4 = _asyncToGenerator(function* (req, res) {
+      console.log(req.body);
       var db_user = new PouchDB(db);
       var email = req.body.email;
       var password = util.md5(req.body.password);

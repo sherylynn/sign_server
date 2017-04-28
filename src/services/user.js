@@ -1,5 +1,6 @@
 var fs = require('fs');
 var util = require('./../util');
+var qs =require('qs');
 var USER_PATH = './database/user.json';
 var PouchDB = require('pouchdb');
 PouchDB.plugin(require('pouchdb-auth')); //pouchdb-auth可以在内置使用，另一个认证的只能在浏览器
@@ -28,12 +29,20 @@ var User = {
     console.log('已经加载');
     //app.get('/user/destroy', this.destroyUser)
     //app.post('/user/get', this.getUser);
+    app.get('/userInfo', this.userInfo);
+    app.get('/users', this.users);
     app.post('/user/create', this.addUser);
     app.post('/user/create', this.addUser_auth);
     app.post('/user/login', this.login);
     app.post('/user/login/token', this.loginByToken);
     app.post('/user/password/update', this.updatePassword);
     app.post('/user/delete', this.deleteUser);
+  },
+  users: async function (req,res){
+    
+  },
+  userInfo: async function (req,res){
+
   },
   addUser_auth: async function (req, res) {
     console.log(req.body);
@@ -500,6 +509,7 @@ var User = {
 
   //用户登录
   login: async function (req, res) {
+    console.log(req.body)
     var db_user = new PouchDB(db);
     var email = req.body.email;
     var password = util.md5(req.body.password);

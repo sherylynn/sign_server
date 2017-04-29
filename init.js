@@ -19,9 +19,27 @@ var iconv = require('iconv-lite');
 
 var init = {
   destroyUser: async function () {
-    var db_user = new PouchDB(db);
-    var res = await db_user.destroy()
-    console.log('数据库已经重建');
+    let db_user = new PouchDB(db);
+    let res = await db_user.destroy()
+    console.log('数据库已经重建' + res);
+  },
+  addAdmin: async() => {
+    let db_user = new PouchDB(db);
+    let username = "admin";
+    let email = "admin";
+    let password = util.md5("admin");
+    let deviceId = 'admin';
+    let token = util.guid() + deviceId;
+    let time = new Date().toLocaleString();
+    let doc = await db_user.put({
+      _id: email,
+      username: username,
+      email: email,
+      password: password,
+      token: token,
+      reg_time: time,
+      log_time: time
+    });
   },
   put: async function () {
     for (var i = 0; i <= users.length - 1; i++) {
@@ -34,20 +52,42 @@ var init = {
       let deviceId = 'init';
       let token = util.guid() + deviceId;
       let time = new Date().toLocaleString();
+      let info = {
+        "序号": users[i]["序号"],
+        "姓名": users[i]["姓名"],
+        "性别": users[i]["性别"],
+        "出生年月": users[i]["出生年月"],
+        "学历": users[i]["学历"],
+        "入党日期": users[i]["入党日期"],
+        "身份证号": users[i]["身份证号"],
+        "联系电话": users[i]["联系电话"],
+        "家庭地址": users[i]["家庭地址"],
+        "手机号": users[i]["手机号"],
+        "组别": users[i]["组别"]
+      }
+      /*
+      let info={
+        number:users[i]["序号"],
+        name:users[i]["姓名"],
+        gender:users[i]["性别"],
+      }
+      */
 
       //更多个人信息还没注入
-      var doc = await db_user.put({
+      let doc = await db_user.put({
         _id: email,
         username: username,
         email: email,
         password: password,
         token: token,
+        info: info,
         reg_time: time,
         log_time: time
       });
     }
   }
 }
-init.put();
-
+//init.put();
+//init.destroyUser()
+init.addAdmin()
 console.log('成功初始化');

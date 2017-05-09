@@ -1,9 +1,12 @@
 'use strict';
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var fs = require('fs');
 var util = require('./../util');
+var qs = require('qs');
 var USER_PATH = './database/user.json';
 var PouchDB = require('pouchdb');
 PouchDB.plugin(require('pouchdb-auth')); //pouchdb-auth可以在内置使用，另一个认证的只能在浏览器
@@ -31,16 +34,144 @@ var User = {
     console.log('已经加载');
     //app.get('/user/destroy', this.destroyUser)
     //app.post('/user/get', this.getUser);
+    app.get('/userInfo', this.userInfo);
+    app.get('/api/users', this.users_get_api);
+    app.get('/users', this.users);
+
+    app.post('/api/users', this.users_post_api);
+
     app.post('/user/create', this.addUser);
     app.post('/user/create', this.addUser_auth);
     app.post('/user/login', this.login);
     app.post('/user/login/token', this.loginByToken);
     app.post('/user/password/update', this.updatePassword);
     app.post('/user/delete', this.deleteUser);
+
+    app.delete('/api/users', this.users_delete_api);
+
+    app.put('/api/users', this.users_put_api);
   },
-  addUser_auth: (() => {
+  users_get_api: (() => {
     var _ref = _asyncToGenerator(function* (req, res) {
-      console.log(req.body);
+      let db_user = new PouchDB(db);
+      let usersListData = yield db_user.allDocs({
+        include_docs: true
+      });
+      console.log(usersListData);
+      const page = qs.parse(req.query);
+      const pageSize = page.pageSize || 10;
+      const currentPage = page.page || 1;
+
+      let data;
+      let newPage;
+
+      let newData = usersListData.data.concat();
+
+      if (page.field) {
+        const d = newData.filter(function (item) {
+          return item[page.field].indexOf(decodeURI(page.keyword)) > -1;
+        });
+
+        data = d.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+        newPage = {
+          current: currentPage * 1,
+          total: d.length
+        };
+      } else {
+        data = usersListData.data.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+        usersListData.page.current = currentPage * 1;
+        newPage = usersListData.page;
+      }
+      res.json({ success: true, data, page: _extends({}, newPage, { pageSize: pageSize }) });
+    });
+
+    return function users_get_api(_x, _x2) {
+      return _ref.apply(this, arguments);
+    };
+  })(),
+  users_post_api: (() => {
+    var _ref2 = _asyncToGenerator(function* (req, res) {
+      const newData = req.body;
+      newData.createTime = new Date().toLocaleString();
+      newData.avatar = Mock.Random.image('100x100', Mock.Random.color(), '#757575', 'png', newData.nickName.substr(0, 1));
+
+      newData.id = usersListData.data.length + 1;
+      usersListData.data.unshift(newData);
+
+      usersListData.page.total = usersListData.data.length;
+      usersListData.page.current = 1;
+
+      global[dataKey] = usersListData;
+
+      res.json({ success: true, data: usersListData.data, page: usersListData.page });
+    });
+
+    return function users_post_api(_x3, _x4) {
+      return _ref2.apply(this, arguments);
+    };
+  })(),
+  users_delete_api: (() => {
+    var _ref3 = _asyncToGenerator(function* (req, res) {
+      const deleteItem = req.body;
+
+      usersListData.data = usersListData.data.filter(function (item) {
+        if (item.id === deleteItem.id) {
+          return false;
+        }
+        return true;
+      });
+
+      usersListData.page.total = usersListData.data.length;
+
+      global[dataKey] = usersListData;
+
+      res.json({ success: true, data: usersListData.data, page: usersListData.page });
+    });
+
+    return function users_delete_api(_x5, _x6) {
+      return _ref3.apply(this, arguments);
+    };
+  })(),
+  users_put_api: (() => {
+    var _ref4 = _asyncToGenerator(function* (req, res) {
+      const editItem = req.body;
+
+      editItem.createTime = Mock.mock('@now');
+      editItem.avatar = Mock.Random.image('100x100', Mock.Random.color(), '#757575', 'png', editItem.nickName.substr(0, 1));
+
+      usersListData.data = usersListData.data.map(function (item) {
+        if (item.id === editItem.id) {
+          return editItem;
+        }
+        return item;
+      });
+
+      global[dataKey] = usersListData;
+      res.json({ success: true, data: usersListData.data, page: usersListData.page });
+    });
+
+    return function users_put_api(_x7, _x8) {
+      return _ref4.apply(this, arguments);
+    };
+  })(),
+  users: (() => {
+    var _ref5 = _asyncToGenerator(function* (req, res) {});
+
+    return function users(_x9, _x10) {
+      return _ref5.apply(this, arguments);
+    };
+  })(),
+  userInfo: (() => {
+    var _ref6 = _asyncToGenerator(function* (req, res) {});
+
+    return function userInfo(_x11, _x12) {
+      return _ref6.apply(this, arguments);
+    };
+  })(),
+  addUser_auth: (() => {
+    var _ref7 = _asyncToGenerator(function* (req, res) {
+      //console.log(req.body);
       var username = req.body.username;
       var password = util.md5(req.body.password);
       var re_password = util.md5(req.body.re_password);
@@ -90,13 +221,13 @@ var User = {
       }
     });
 
-    return function addUser_auth(_x, _x2) {
-      return _ref.apply(this, arguments);
+    return function addUser_auth(_x13, _x14) {
+      return _ref7.apply(this, arguments);
     };
   })(),
   login_auth: (() => {
-    var _ref2 = _asyncToGenerator(function* (req, res) {
-      console.log(req.body);
+    var _ref8 = _asyncToGenerator(function* (req, res) {
+      //console.log(req.body);
       var email = req.body.email;
       var password = util.md5(req.body.password);
       var deviceId = req.body.deviceId;
@@ -220,8 +351,8 @@ var User = {
       */
     });
 
-    return function login_auth(_x3, _x4) {
-      return _ref2.apply(this, arguments);
+    return function login_auth(_x15, _x16) {
+      return _ref8.apply(this, arguments);
     };
   })(),
   destroyUser: function (req, res) {
@@ -276,7 +407,7 @@ var User = {
 
   //添加用户
   addUser: (() => {
-    var _ref3 = _asyncToGenerator(function* (req, res) {
+    var _ref9 = _asyncToGenerator(function* (req, res) {
       var db_user = new PouchDB(db);
       console.log(req.body);
       var username = req.body.username;
@@ -510,14 +641,14 @@ var User = {
       */
     });
 
-    return function addUser(_x5, _x6) {
-      return _ref3.apply(this, arguments);
+    return function addUser(_x17, _x18) {
+      return _ref9.apply(this, arguments);
     };
   })(),
 
   //用户登录
   login: (() => {
-    var _ref4 = _asyncToGenerator(function* (req, res) {
+    var _ref10 = _asyncToGenerator(function* (req, res) {
       console.log(req.body);
       var db_user = new PouchDB(db);
       var email = req.body.email;
@@ -648,14 +779,14 @@ var User = {
       */
     });
 
-    return function login(_x7, _x8) {
-      return _ref4.apply(this, arguments);
+    return function login(_x19, _x20) {
+      return _ref10.apply(this, arguments);
     };
   })(),
 
   //通过token登录
   loginByToken: (() => {
-    var _ref5 = _asyncToGenerator(function* (req, res) {
+    var _ref11 = _asyncToGenerator(function* (req, res) {
       var db_user = new PouchDB(db);
       var token = req.body.token;
       var r_index = yield db_user.createIndex({
@@ -717,14 +848,14 @@ var User = {
       */
     });
 
-    return function loginByToken(_x9, _x10) {
-      return _ref5.apply(this, arguments);
+    return function loginByToken(_x21, _x22) {
+      return _ref11.apply(this, arguments);
     };
   })(),
 
   //用户修改密码 //fix
   updatePassword: (() => {
-    var _ref6 = _asyncToGenerator(function* (req, res) {
+    var _ref12 = _asyncToGenerator(function* (req, res) {
       let db_user = new PouchDB(db);
       let email = req.body.email;
       let token = req.body.token;
@@ -776,8 +907,8 @@ var User = {
       }
     });
 
-    return function updatePassword(_x11, _x12) {
-      return _ref6.apply(this, arguments);
+    return function updatePassword(_x23, _x24) {
+      return _ref12.apply(this, arguments);
     };
   })(),
 

@@ -30,13 +30,103 @@ var User = {
     //app.get('/user/destroy', this.destroyUser)
     //app.post('/user/get', this.getUser);
     app.get('/userInfo', this.userInfo);
+    app.get('/api/users',this.users_get_api);
     app.get('/users', this.users);
+
+    app.post('/api/users',this.users_post_api);
+
     app.post('/user/create', this.addUser);
     app.post('/user/create', this.addUser_auth);
     app.post('/user/login', this.login);
     app.post('/user/login/token', this.loginByToken);
     app.post('/user/password/update', this.updatePassword);
     app.post('/user/delete', this.deleteUser);
+
+
+    app.delete('/api/users',this.users_delete_api);
+
+    app.put('/api/users',this.users_put_api);
+  },
+  users_get_api:async (req,res)=>{
+    let db_user = new PouchDB(db);
+    let usersListData = await db_user.allDocs({
+        include_docs: true,
+      })
+    console.log(usersListData);
+    const page = qs.parse(req.query)
+    const pageSize = page.pageSize || 10
+    const currentPage = page.page || 1
+
+    let data
+    let newPage
+
+    let newData = usersListData.data.concat()
+
+    if (page.field) {
+      const d = newData.filter(function (item) {
+        return item[page.field].indexOf(decodeURI(page.keyword)) > -1
+      })
+
+      data = d.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+
+      newPage = {
+        current: currentPage * 1,
+        total: d.length
+      }
+    } else {
+      data = usersListData.data.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+      usersListData.page.current = currentPage * 1
+      newPage = usersListData.page
+    }
+    res.json({success: true, data, page: { ...newPage, pageSize: pageSize}})
+  },
+  users_post_api:async (req,res)=>{
+    const newData = req.body
+    newData.createTime = new Date().toLocaleString();
+    newData.avatar = Mock.Random.image('100x100', Mock.Random.color(), '#757575', 'png', newData.nickName.substr(0, 1))
+
+    newData.id = usersListData.data.length + 1
+    usersListData.data.unshift(newData)
+
+    usersListData.page.total = usersListData.data.length
+    usersListData.page.current = 1
+
+    global[dataKey] = usersListData
+
+    res.json({success: true, data: usersListData.data, page: usersListData.page})
+  },
+  users_delete_api:async (req,res)=>{
+    const deleteItem = req.body
+
+    usersListData.data = usersListData.data.filter(function (item) {
+      if (item.id === deleteItem.id) {
+        return false
+      }
+      return true
+    })
+
+    usersListData.page.total = usersListData.data.length
+
+    global[dataKey] = usersListData
+
+    res.json({success: true, data: usersListData.data, page: usersListData.page})
+  },
+  users_put_api:async (req,res)=>{
+    const editItem = req.body
+
+    editItem.createTime = Mock.mock('@now')
+    editItem.avatar = Mock.Random.image('100x100', Mock.Random.color(), '#757575', 'png', editItem.nickName.substr(0, 1))
+
+    usersListData.data = usersListData.data.map(function (item) {
+      if (item.id === editItem.id) {
+        return editItem
+      }
+      return item
+    })
+
+    global[dataKey] = usersListData
+    res.json({success: true, data: usersListData.data, page: usersListData.page})
+  
   },
   users: async function (req,res){
     
@@ -45,7 +135,7 @@ var User = {
 
   },
   addUser_auth: async function (req, res) {
-    console.log(req.body);
+    //console.log(req.body);
     var username = req.body.username;
     var password = util.md5(req.body.password);
     var re_password = util.md5(req.body.re_password);
@@ -95,7 +185,7 @@ var User = {
     }
   },
   login_auth: async function (req, res) {
-    console.log(req.body);
+    //console.log(req.body);
     var email = req.body.email;
     var password = util.md5(req.body.password);
     var deviceId = req.body.deviceId;

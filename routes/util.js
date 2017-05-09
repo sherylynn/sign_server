@@ -32,6 +32,14 @@ module.exports = {
     return newPwd;
   },
 
+  md5_users: function (password) {
+    var md5 = crypto.createHash('md5');
+    //var salt = '(!%$88hs@gophs*)#sassb9';
+    var salt = '&ezYdV7E&dFcw!nnoOv1fvp';
+    var newPwd = md5.update(password + salt).digest('hex');
+    return newPwd;
+  },
+
   getKey: function () {
     return 'HSHHSGSGGSTWSYWSYUSUWSHWBS-REACT-NATIVE';
   },

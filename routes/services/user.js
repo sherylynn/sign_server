@@ -53,11 +53,21 @@ var User = {
   },
   users_get_api: (() => {
     var _ref = _asyncToGenerator(function* (req, res) {
+      console.log(req.body);
       let db_user = new PouchDB(db);
-      let usersListData = yield db_user.allDocs({
+      let usersListData = {
+        data: [],
+        page: {}
+      };
+      let allDocs = yield db_user.allDocs({
         include_docs: true
       });
-      console.log(usersListData);
+      usersListData.data = allDocs.rows;
+      usersListData.page = {
+        total: usersListData.data.length,
+        current: 1
+      };
+      console.log(usersListData.data);
       const page = qs.parse(req.query);
       const pageSize = page.pageSize || 10;
       const currentPage = page.page || 1;
@@ -65,7 +75,7 @@ var User = {
       let data;
       let newPage;
 
-      let newData = usersListData.data.concat();
+      //let newData = usersListData.data.concat()
 
       if (page.field) {
         const d = newData.filter(function (item) {
@@ -83,7 +93,7 @@ var User = {
         usersListData.page.current = currentPage * 1;
         newPage = usersListData.page;
       }
-      res.json({ success: true, data, page: _extends({}, newPage, { pageSize: pageSize }) });
+      return res.send({ success: true, data, page: _extends({}, newPage, { pageSize: pageSize }) });
     });
 
     return function users_get_api(_x, _x2) {
@@ -94,7 +104,7 @@ var User = {
     var _ref2 = _asyncToGenerator(function* (req, res) {
       const newData = req.body;
       newData.createTime = new Date().toLocaleString();
-      newData.avatar = Mock.Random.image('100x100', Mock.Random.color(), '#757575', 'png', newData.nickName.substr(0, 1));
+      //newData.avatar = Mock.Random.image('100x100', Mock.Random.color(), '#757575', 'png', newData.nickName.substr(0, 1))
 
       newData.id = usersListData.data.length + 1;
       usersListData.data.unshift(newData);
@@ -137,8 +147,8 @@ var User = {
     var _ref4 = _asyncToGenerator(function* (req, res) {
       const editItem = req.body;
 
-      editItem.createTime = Mock.mock('@now');
-      editItem.avatar = Mock.Random.image('100x100', Mock.Random.color(), '#757575', 'png', editItem.nickName.substr(0, 1));
+      editItem.createTime = new Date().toLocaleString();
+      //editItem.avatar = Mock.Random.image('100x100', Mock.Random.color(), '#757575', 'png', editItem.nickName.substr(0, 1))
 
       usersListData.data = usersListData.data.map(function (item) {
         if (item.id === editItem.id) {
@@ -148,7 +158,7 @@ var User = {
       });
 
       global[dataKey] = usersListData;
-      res.json({ success: true, data: usersListData.data, page: usersListData.page });
+      return res.send({ success: true, data: usersListData.data, page: usersListData.page });
     });
 
     return function users_put_api(_x7, _x8) {

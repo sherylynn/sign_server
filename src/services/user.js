@@ -48,11 +48,22 @@ var User = {
     app.put('/api/users',this.users_put_api);
   },
   users_get_api:async (req,res)=>{
+    console.log(req.body);
     let db_user = new PouchDB(db);
-    let usersListData = await db_user.allDocs({
+    //let的时候需要先定义data page 后再设定
+    let usersListData={
+      data:[],
+      page:{}
+    }
+    let allDocs = await db_user.allDocs({
         include_docs: true,
       })
-    console.log(usersListData);
+    usersListData.data =allDocs.rows
+    usersListData.page ={
+      total: usersListData.data.length,
+      current: 1
+    }
+    console.log(usersListData.data);
     const page = qs.parse(req.query)
     const pageSize = page.pageSize || 10
     const currentPage = page.page || 1
@@ -60,7 +71,7 @@ var User = {
     let data
     let newPage
 
-    let newData = usersListData.data.concat()
+    //let newData = usersListData.data.concat()
 
     if (page.field) {
       const d = newData.filter(function (item) {
@@ -78,12 +89,14 @@ var User = {
       usersListData.page.current = currentPage * 1
       newPage = usersListData.page
     }
-    res.json({success: true, data, page: { ...newPage, pageSize: pageSize}})
+
+    // 注意 return res.send
+    return res.send({success: true, data, page: { ...newPage, pageSize: pageSize}})
   },
   users_post_api:async (req,res)=>{
     const newData = req.body
     newData.createTime = new Date().toLocaleString();
-    newData.avatar = Mock.Random.image('100x100', Mock.Random.color(), '#757575', 'png', newData.nickName.substr(0, 1))
+    //newData.avatar = Mock.Random.image('100x100', Mock.Random.color(), '#757575', 'png', newData.nickName.substr(0, 1))
 
     newData.id = usersListData.data.length + 1
     usersListData.data.unshift(newData)
@@ -114,8 +127,8 @@ var User = {
   users_put_api:async (req,res)=>{
     const editItem = req.body
 
-    editItem.createTime = Mock.mock('@now')
-    editItem.avatar = Mock.Random.image('100x100', Mock.Random.color(), '#757575', 'png', editItem.nickName.substr(0, 1))
+    editItem.createTime = new Date().toLocaleString()
+    //editItem.avatar = Mock.Random.image('100x100', Mock.Random.color(), '#757575', 'png', editItem.nickName.substr(0, 1))
 
     usersListData.data = usersListData.data.map(function (item) {
       if (item.id === editItem.id) {
@@ -125,7 +138,7 @@ var User = {
     })
 
     global[dataKey] = usersListData
-    res.json({success: true, data: usersListData.data, page: usersListData.page})
+    return res.send({success: true, data: usersListData.data, page: usersListData.page})
   
   },
   users: async function (req,res){

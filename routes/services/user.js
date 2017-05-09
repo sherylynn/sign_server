@@ -54,7 +54,9 @@ var User = {
   users_get_api: (() => {
     var _ref = _asyncToGenerator(function* (req, res) {
       console.log(req.body);
+      console.log(req.query);
       let db_user = new PouchDB(db);
+      //let的时候需要先定义data page 后再设定
       let usersListData = {
         data: [],
         page: {}
@@ -62,12 +64,18 @@ var User = {
       let allDocs = yield db_user.allDocs({
         include_docs: true
       });
-      usersListData.data = allDocs.rows;
+      //alldoc的格式问题,加上要去掉token等,并把info信息提前
+      usersListData.data = allDocs.rows.map(function (obj) {
+        return _extends({}, obj.doc, {
+          password: 0,
+          token: 0
+        }, obj.doc.info);
+      });
       usersListData.page = {
         total: usersListData.data.length,
         current: 1
       };
-      console.log(usersListData.data);
+      //console.log(usersListData.data);
       const page = qs.parse(req.query);
       const pageSize = page.pageSize || 10;
       const currentPage = page.page || 1;
@@ -93,6 +101,8 @@ var User = {
         usersListData.page.current = currentPage * 1;
         newPage = usersListData.page;
       }
+
+      // 注意 return res.send
       return res.send({ success: true, data, page: _extends({}, newPage, { pageSize: pageSize }) });
     });
 

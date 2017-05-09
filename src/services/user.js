@@ -49,6 +49,7 @@ var User = {
   },
   users_get_api:async (req,res)=>{
     console.log(req.body);
+    console.log(req.query)
     let db_user = new PouchDB(db);
     //let的时候需要先定义data page 后再设定
     let usersListData={
@@ -58,12 +59,20 @@ var User = {
     let allDocs = await db_user.allDocs({
         include_docs: true,
       })
-    usersListData.data =allDocs.rows
+    //alldoc的格式问题,加上要去掉token等,并把info信息提前
+    usersListData.data =allDocs.rows.map((obj)=>{
+      return {
+        ...obj.doc,
+        password:0,
+        token:0,
+        ...obj.doc.info
+      }
+    })
     usersListData.page ={
       total: usersListData.data.length,
       current: 1
     }
-    console.log(usersListData.data);
+    //console.log(usersListData.data);
     const page = qs.parse(req.query)
     const pageSize = page.pageSize || 10
     const currentPage = page.page || 1

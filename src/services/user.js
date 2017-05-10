@@ -65,8 +65,8 @@ var User = {
   
   users_get_api:(req,res)=>{
     require('./users_get_api').users_get_api(req,res);
-  if (module.hot){
-    module.hot.accept('./users_get_api', function() {
+    if (module.hot){
+      module.hot.accept('./users_get_api', function() {
       require('./users_get_api').users_get_api(req,res)
     });
   }},
@@ -86,21 +86,13 @@ var User = {
 
     res.json({success: true, data: usersListData.data, page: usersListData.page})
   },
-  users_delete_api:async (req,res)=>{
-    const deleteItem = req.body
-    usersListData.data = usersListData.data.filter(function (item) {
-      if (item.id === deleteItem.id) {
-        return false
-      }
-      return true
-    })
-
-    usersListData.page.total = usersListData.data.length
-
-    global[dataKey] = usersListData
-
-    res.json({success: true, data: usersListData.data, page: usersListData.page})
-  },
+  users_delete_api:(req,res)=>{
+    require('./users_get_api').users_delete_api(req,res);
+    if (module.hot){
+      module.hot.accept('./users_get_api', function() {
+      require('./users_get_api').users_delete_api(req,res)
+    });
+  }},
   users_put_api:async (req,res)=>{
     const editItem = req.body
 
@@ -588,203 +580,22 @@ var User = {
   },
 
   //用户登录
-  login: async function (req, res) {
-    console.log(req.body)
-    console.log(1);
-    var db_user = new PouchDB(db);
-    var email = req.body.email;
-    var password = util.md5(req.body.password);
-    var deviceId = req.body.deviceId;
-    var token = util.guid() + deviceId;
-    try {
-      var doc = await db_user.get(email);
-      if (doc['password'] == password) {
-        let time = new Date().toLocaleString();
-        var response = await db_user.put({
-          _id: email,
-          _rev: doc._rev,
-          email: email,
-          password: password,
-          username: doc['username'],
-          token: token,
-          reg_time: doc['reg_time'],
-          log_time: time
-        });
-        return res.send({
-          status: 1,
-          data: {
-            email: email,
-            username: doc['username'],
-            token: token,
-            reg_time: doc['reg_time'],
-            log_time: time
-
-          }
-        });
-      } else {
-        console.log(password);
-        console.log(doc['password']);
-        console.log(doc);
-        return res.send({
-          status: 0,
-          data: '密码错误'
-        });
-      }
-
-    } catch (err) {
-      console.log(err);
-      return res.send({
-        status: 0,
-        data: '请检查是否是注册过的邮箱'
-      });
-    }
-    /*
-    var r_index = await db_user.createIndex({
-      index: {
-        fields: ['email', 'password']
-      }
+  login:(req,res)=>{
+    require('./users_get_api').login(req,res);
+  if (module.hot){
+    module.hot.accept('./users_get_api', function() {
+      require('./users_get_api').login(req,res)
     });
-    console.log(r_index);
-    try {
-      var r_email = await db_user.find({
-        selector: {
-          email: email
-        }
-      })
-      if (r_email['docs'][0]['password'] == password) {
-        try {
-          var r_all = await db_user.put({
-            _id: r_email['docs'][0]['_id'],
-            _rew: r_email['docs'][0]['_rev'],
-            'token': token
-          })
-          return res.send({
-            status: 1,
-            data: r_email['docs'][0].s
-          });
-        } catch (error) {
-          console.log(error);
-          return res.send({
-            status: 0,
-            data: '出故障了'
-          });
-        }
-      } else {
-        return res.send({
-          status: 0,
-          data: '密码错误'
-        });
-      }
-    } catch (error) {
-      console.log(error)
-      return res.send({
-        status: 0,
-        data: '请检查是否是注册过的邮箱'
-      });
-    }
-    */
-    /*
-    db_user.createIndex({
-      index: {
-        fields: ['email', 'password']
-      }
-    }).then(function (r) {
-      console.log(r);
-      return db_user.find({
-        selector: {
-          $and: [
-            { email: email },
-            { password: password }
-          ]
-        }
-      })
-    }).then(function (r) {
-      return db_user.put({
-        _id: r['docs'][0]['_id'],
-        _rew: r['docs'][0]['_rev'],
-        'token': token
-      })
-    }).then(function () {
-      return res.send({
-        status: 1,
-        data: r['docs'][0].s
-      });
-    }).catch(function (err) {
-      if (err) {
-        console.log(err);
-        return res.send({
-          status: 0,
-          data: '邮箱或者密码错误'
-        });
-      }
-    })
-    */
-  },
+  }},
 
   //通过token登录
-  loginByToken: async function (req, res) {
-    var db_user = new PouchDB(db);
-    var token = req.body.token;
-    var r_index = await db_user.createIndex({
-      index: {
-        fields: ['token']
-      }
+  loginByToken: (req,res)=>{
+    require('./users_get_api').loginByToken(req,res);
+  if (module.hot){
+    module.hot.accept('./users_get_api', function() {
+      require('./users_get_api').loginByToken(req,res)
     });
-    console.log(r_index);
-    try {
-      var r_token = await db_user.find({
-        selector: {
-          token: token
-        }
-      })
-      if (r_token['docs'].length > 0) {
-        console.log(r_token);
-        return res.send({
-          status: 1,
-          data: r_token['docs'][0]
-        });
-      } else {
-        return res.send({
-          status: 0,
-          data: 'token失效'
-        });
-      }
-
-    } catch (error) {
-      console.log(error)
-      return res.send({
-        status: 0,
-        data: '后台维护'
-      });
-    }
-    /*
-    db_user.createIndex({
-      index: {
-        fields: ['token']
-      }
-    }).then(function (r) {
-      console.log(r);
-      return db_user.find({
-        selector:
-        { token: token }
-      })
-    }).then(function () {
-      return res.send({
-        status: 1,
-        data: r['docs'][0].s
-      });
-    }).catch(function (err) {
-      if (err) {
-        console.log(err);
-        return res.send({
-          status: 0,
-          info: 'token失效'
-        });
-      }
-    })
-    */
-
-  },
+  }},
 
   //用户修改密码 //fix
   updatePassword: async function (req, res) {

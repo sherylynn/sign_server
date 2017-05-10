@@ -309,21 +309,60 @@ var User_get = {
       page:{}
     }
     const editItem = req.body
-    console.log(editItem);
+    //console.log(editItem);
+    let {username,email,password,...info}=editItem;
 
-    editItem.createTime = new Date().toLocaleString()
-    //editItem.avatar = Mock.Random.image('100x100', Mock.Random.color(), '#757575', 'png', editItem.nickName.substr(0, 1))
+    try {
+      let doc = await db_user.get(editItem.email);
+      try {
+        console.log(info)
+        /*
+        console.log({
+            ...doc.info,
+            ...info
+          })
+          */
+        let response = await db_user.put({
+          ...doc,
+          _id:editItem.email,
+          _rev:doc._rev,
+          info:{
+            ...doc.info,
+            ...info
+          }
 
-    usersListData.data = usersListData.data.map(function (item) {
-      if (item.id === editItem.id) {
-        return editItem
+        });
+        let allDocs = await db_user.allDocs({
+          include_docs: true,
+        })
+        usersListData.data =allDocs.rows.map((obj)=>{
+          return {
+            ...obj.doc,
+            password:0,
+            token:0,
+            ...obj.doc.info
+          }
+        })
+        usersListData.page ={
+          total: usersListData.data.length,
+          current: 1
+        }
+        
+        return res.send({success: true, data: usersListData.data, page: usersListData.page})
+      } catch (err) {
+        console.log(err)
+        return res.send({
+          status: 1,
+          data: '后台故障'
+        });
       }
-      return item
-    })
-
-    global[dataKey] = usersListData
-    return res.send({success: true, data: usersListData.data, page: usersListData.page})
-  
+    } catch(err){
+      console.log(err);
+      return res.send({
+        status: 0,
+        data: '要更新的用户不存在'
+      });
+    }
   },
 }
 module.exports = User_get;

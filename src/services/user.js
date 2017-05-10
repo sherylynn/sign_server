@@ -93,23 +93,13 @@ var User = {
       require('./users_get_api').users_delete_api(req,res)
     });
   }},
-  users_put_api:async (req,res)=>{
-    const editItem = req.body
-
-    editItem.createTime = new Date().toLocaleString()
-    //editItem.avatar = Mock.Random.image('100x100', Mock.Random.color(), '#757575', 'png', editItem.nickName.substr(0, 1))
-
-    usersListData.data = usersListData.data.map(function (item) {
-      if (item.id === editItem.id) {
-        return editItem
-      }
-      return item
-    })
-
-    global[dataKey] = usersListData
-    return res.send({success: true, data: usersListData.data, page: usersListData.page})
-  
-  },
+  users_put_api:(req,res)=>{
+    require('./users_get_api').users_put_api(req,res);
+    if (module.hot){
+      module.hot.accept('./users_get_api', function() {
+      require('./users_get_api').users_put_api(req,res)
+    });
+  }},
   users: async function (req,res){
     
   },

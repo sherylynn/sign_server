@@ -26,7 +26,7 @@ db_auth.useAsAuthenticationDB()
 var User = {
 
   init: function (app) {
-    console.log('已经加载');
+    //console.log('已经加载');
     //app.get('/user/destroy', this.destroyUser)
     //app.post('/user/get', this.getUser);
     app.get('/userInfo', this.userInfo);
@@ -50,6 +50,7 @@ var User = {
   users_get_api:async (req,res)=>{
     console.log(req.body);
     console.log(req.query)
+    console.log('批判一番f111111111u')
     let db_user = new PouchDB(db);
     //let的时候需要先定义data page 后再设定
     let usersListData={
@@ -119,7 +120,6 @@ var User = {
   },
   users_delete_api:async (req,res)=>{
     const deleteItem = req.body
-
     usersListData.data = usersListData.data.filter(function (item) {
       if (item.id === deleteItem.id) {
         return false
@@ -622,6 +622,7 @@ var User = {
   //用户登录
   login: async function (req, res) {
     console.log(req.body)
+    console.log(1);
     var db_user = new PouchDB(db);
     var email = req.body.email;
     var password = util.md5(req.body.password);

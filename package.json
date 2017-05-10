@@ -4,8 +4,9 @@
   "private": true,
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "build": "./node_modules/.bin/babel src -d routes"
+    "start": "node ./build/bundle.js",
+    "build": "./node_modules/.bin/babel src -d routes",
+    "dev":"webpack --watch"
   },
   "dependencies": {
     "async": "^2.0.0-rc.5",
@@ -41,6 +42,7 @@
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-plugin-transform-strict-mode": "^6.8.0",
     "babel-preset-es2017": "^6.24.1",
-    "webpack": "^2.2.1"
+    "webpack": "^2.2.1",
+    "webpack-node-externals": "^1.6.0"
   }
 }

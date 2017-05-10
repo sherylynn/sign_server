@@ -10,15 +10,24 @@ var express = require('express'),
   bodyParser = require('body-parser'),
   multer = require('multer'),
   async = require('async'),
-  routes = require('./routes/routes'),
+  routes = require('./routes'),
   app = express(),
   showdown = require('showdown'),
   converter = new showdown.Converter(),
   PouchDB = require('pouchdb');
 
+var service_test=require('./test');
+  service_test.init()
+  if (module.hot){
+    module.hot.accept('./test.js', function() {
+      var newHotModule = require('./test.js');
+      newHotModule.init()
+    });
+  }
+
 
 app.set('port', 3000);
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, '/../views'));
 app.set('view engine', 'ejs');
 app.engine('md', function(path, options, fn) {
   fs.readFile(path, 'utf8', function(err, str) {
@@ -31,14 +40,14 @@ app.engine('md', function(path, options, fn) {
   });
 });
 app.use(cors());
-app.use(favicon(__dirname + '/views/favicon.ico'));
+app.use(favicon(__dirname + '/../views/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'views')));
+app.use(express.static(path.join(__dirname, '/../views')));
 //为了防止user数据库出问题，用户数据用couchdb处理
 app.use('/db', require('express-pouchdb')(PouchDB, {
   mode: 'minimumForPouchDB',
@@ -47,7 +56,7 @@ app.use('/db', require('express-pouchdb')(PouchDB, {
   }
 })); //目前版本非根目录下utils是不可以使用的，若根目录则kankan不能使用，会被db截取
 var shit = new PouchDB('shit')
-
+console.log(process.env.npm_package_version)
 var server = http.createServer(app);
 server.listen(app.get('port'));
 

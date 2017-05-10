@@ -1,6 +1,6 @@
-
 var Test = {
   init: function(app){
+    console.log('test')
     app.get('/test/test', this.doTest);
     app.get('/userInfo', this.doShow);
     app.get('/dashboard', this.dashboard);

@@ -7,6 +7,11 @@ PouchDB.plugin(require('pouchdb-auth')); //pouchdb-auth可以在内置使用，�
 PouchDB.plugin(require('pouchdb-find')); //麻痹不兼容couchdb1.x
 var db = 'http://localhost:3456/shit';
 var db_auth = new PouchDB('http://localhost:3456/_users');
+
+
+
+
+
 /*
 try {
   let r = await db_auth.useAsAuthenticationDB();
@@ -23,6 +28,14 @@ db_auth.useAsAuthenticationDB()
 //var db = 'shit';
 //尝试不在开始声明以便删除数据库
 //var db_user = new PouchDB('shit');
+/*
+let users_get_api=require('./users_get_api').users_get_api;
+ if (module.hot){
+    module.hot.accept('./users_get_api', function() {
+      users_get_api=require('./users_get_api').users_get_api
+    });
+ }
+ */
 var User = {
 
   init: function (app) {
@@ -30,7 +43,9 @@ var User = {
     //app.get('/user/destroy', this.destroyUser)
     //app.post('/user/get', this.getUser);
     app.get('/userInfo', this.userInfo);
-    app.get('/api/users',this.users_get_api);
+    app.get('/api/users',this.users_get_api)
+    //app.get('/api/users',users_get_api);
+    //app.get('/api/users',this.users_get_api);
     app.get('/users', this.users);
 
     app.post('/api/users',this.users_post_api);
@@ -47,62 +62,15 @@ var User = {
 
     app.put('/api/users',this.users_put_api);
   },
-  users_get_api:async (req,res)=>{
-    console.log(req.body);
-    console.log(req.query)
-    console.log('批判一番f111111111u')
-    let db_user = new PouchDB(db);
-    //let的时候需要先定义data page 后再设定
-    let usersListData={
-      data:[],
-      page:{}
-    }
-    let allDocs = await db_user.allDocs({
-        include_docs: true,
-      })
-    //alldoc的格式问题,加上要去掉token等,并把info信息提前
-    usersListData.data =allDocs.rows.map((obj)=>{
-      return {
-        ...obj.doc,
-        password:0,
-        token:0,
-        ...obj.doc.info
-      }
-    })
-    usersListData.page ={
-      total: usersListData.data.length,
-      current: 1
-    }
-    //console.log(usersListData.data);
-    const page = qs.parse(req.query)
-    const pageSize = page.pageSize || 10
-    const currentPage = page.page || 1
-
-    let data
-    let newPage
-
-    //let newData = usersListData.data.concat()
-
-    if (page.field) {
-      const d = newData.filter(function (item) {
-        return item[page.field].indexOf(decodeURI(page.keyword)) > -1
-      })
-
-      data = d.slice((currentPage - 1) * pageSize, currentPage * pageSize)
-
-      newPage = {
-        current: currentPage * 1,
-        total: d.length
-      }
-    } else {
-      data = usersListData.data.slice((currentPage - 1) * pageSize, currentPage * pageSize)
-      usersListData.page.current = currentPage * 1
-      newPage = usersListData.page
-    }
-
-    // 注意 return res.send
-    return res.send({success: true, data, page: { ...newPage, pageSize: pageSize}})
-  },
+  
+  users_get_api:(req,res)=>{
+    require('./users_get_api').users_get_api(req,res);
+  if (module.hot){
+    module.hot.accept('./users_get_api', function() {
+      require('./users_get_api').users_get_api(req,res)
+    });
+  }},
+  
   users_post_api:async (req,res)=>{
     const newData = req.body
     newData.createTime = new Date().toLocaleString();

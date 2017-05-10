@@ -37,7 +37,7 @@ export default {
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NamedModulesPlugin(),
-        new webpack.NoEmitOnErrorsPlugin()
+        //new webpack.NoEmitOnErrorsPlugin()
     ],
     resolve: {
         extensions: ['*', '.js', '.json']

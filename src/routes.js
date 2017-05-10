@@ -37,16 +37,30 @@ module.exports = function(app) {
     });
   }
   //得直接确定路径，不能动态加载 就是小嚼说的 webpack 动态 require 的问题
-  var service_user=require('./services/user.js');
+  //express的特性，已经路由的路径不会响应第二个路由
+  /*
+  let service_user=require('./services/user.js');
+  service_user.init && service_user.init(app);
+  module.hot.accept('./services/user.js', function() {
+    service_user= require('./services/user.js');
+    service_user.init && service_user.init(app);
+  });
+  */
+  /*
+  let service_user=require('./services/user.js');
+  if (module.hot){
+    module.hot.accept('./services/user.js', function() {
+      service_user = require('./services/user.js');
+    });
+  }
+  service_user.init && service_user.init(app);
+  */
+  let service_user=require('./services/user.js');
   service_user.init && service_user.init(app);
   if (module.hot){
-    try {
-      module.hot.accept('./services/user.js', function() {
-        service_user= require('./services/user.js');
-        service_user.init && service_user.init(app);
-      });
-    } catch(e) {
-      console.log(e)
-    }
+    module.hot.accept('./services/user.js', function() {
+      service_user = require('./services/user.js');
+    });
   }
+  
 };

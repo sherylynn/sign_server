@@ -16,14 +16,7 @@ var express = require('express'),
   converter = new showdown.Converter(),
   PouchDB = require('pouchdb');
 
-var service_test=require('./test');
-  service_test.init()
-  if (module.hot){
-    module.hot.accept('./test.js', function() {
-      var newHotModule = require('./test.js');
-      newHotModule.init()
-    });
-  }
+
 
 
 app.set('port', 3000);

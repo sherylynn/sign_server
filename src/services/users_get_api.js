@@ -302,5 +302,28 @@ var User_get = {
       });
     }
   },
+  users_put_api:async (req,res)=>{
+    let db_user = new PouchDB(db);
+    let usersListData={
+      data:[],
+      page:{}
+    }
+    const editItem = req.body
+    console.log(editItem);
+
+    editItem.createTime = new Date().toLocaleString()
+    //editItem.avatar = Mock.Random.image('100x100', Mock.Random.color(), '#757575', 'png', editItem.nickName.substr(0, 1))
+
+    usersListData.data = usersListData.data.map(function (item) {
+      if (item.id === editItem.id) {
+        return editItem
+      }
+      return item
+    })
+
+    global[dataKey] = usersListData
+    return res.send({success: true, data: usersListData.data, page: usersListData.page})
+  
+  },
 }
 module.exports = User_get;

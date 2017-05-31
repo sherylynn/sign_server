@@ -20,6 +20,7 @@ var express = require('express'),
 
 
 app.set('port', 3000);
+//app.set('views', path.join(__dirname, '/../views'));
 app.set('views', path.join(__dirname, '/../views'));
 app.set('view engine', 'ejs');
 app.engine('md', function(path, options, fn) {
@@ -40,7 +41,7 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, '/../views')));
+app.use(express.static(path.join(__dirname, '/../dist')));
 //为了防止user数据库出问题，用户数据用couchdb处理
 app.use('/db', require('express-pouchdb')(PouchDB, {
   mode: 'minimumForPouchDB',

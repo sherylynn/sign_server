@@ -62,5 +62,12 @@ module.exports = function(app) {
       service_user = require('./services/user.js');
     });
   }
+  let service_activity=require('./services/activity.js');
+  service_activity.init && service_activity.init(app);
+  if (module.hot){
+    module.hot.accept('./services/activity.js', function() {
+      service_activity = require('./services/activity.js');
+    });
+  }
   
 };

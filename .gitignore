@@ -33,6 +33,9 @@ local.properties
 node_modules/
 npm-debug.log
 
+# 前端
+dist
+
 # server
 node_modules/
 pouch__all_dbs__/

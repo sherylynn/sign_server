@@ -42,11 +42,14 @@ var User = {
     //console.log('已经加载');
     //app.get('/user/destroy', this.destroyUser)
     //app.post('/user/get', this.getUser);
-    app.get('/userInfo', this.userInfo);
+    app.get('/api/userInfo', this.userInfo);
     app.get('/api/users',this.users_get_api)
     //app.get('/api/users',users_get_api);
     //app.get('/api/users',this.users_get_api);
     app.get('/users', this.users);
+
+    //鉴权
+    app.get('/user',this.user_permission)
 
     app.post('/api/users',this.users_post_api);
 
@@ -63,6 +66,8 @@ var User = {
     app.put('/api/users',this.users_put_api);
   },
   
+  
+
   users_get_api:(req,res)=>{
     require('./users_get_api').users_get_api(req,res);
     if (module.hot){
@@ -71,40 +76,56 @@ var User = {
     });
   }},
   
-  users_post_api:async (req,res)=>{
-    const newData = req.body
-    newData.createTime = new Date().toLocaleString();
-    //newData.avatar = Mock.Random.image('100x100', Mock.Random.color(), '#757575', 'png', newData.nickName.substr(0, 1))
-
-    newData.id = usersListData.data.length + 1
-    usersListData.data.unshift(newData)
-
-    usersListData.page.total = usersListData.data.length
-    usersListData.page.current = 1
-
-    global[dataKey] = usersListData
-
-    res.json({success: true, data: usersListData.data, page: usersListData.page})
+  users_post_api:(req,res)=>{
+    require('./users_get_api').users_post_api(req,res);
+    if (module.hot){
+      module.hot.accept('./users_get_api', function() {
+        require('./users_get_api').users_post_api(req,res)
+      });
+    }
   },
   users_delete_api:(req,res)=>{
     require('./users_get_api').users_delete_api(req,res);
     if (module.hot){
       module.hot.accept('./users_get_api', function() {
-      require('./users_get_api').users_delete_api(req,res)
-    });
-  }},
+        require('./users_get_api').users_delete_api(req,res)
+      });
+    }
+  },
   users_put_api:(req,res)=>{
     require('./users_get_api').users_put_api(req,res);
     if (module.hot){
       module.hot.accept('./users_get_api', function() {
-      require('./users_get_api').users_put_api(req,res)
-    });
-  }},
+        require('./users_get_api').users_put_api(req,res)
+      });
+    }
+  },
+  user_permission:(req,res)=>{
+    require('./users_get_api').user_permission(req,res);
+    if (module.hot){
+      module.hot.accept('./users_get_api', function() {
+        require('./users_get_api').user_permission(req,res)
+      });
+    }
+  },
   users: async function (req,res){
     
   },
   userInfo: async function (req,res){
-
+    const cookies=req.cookies || ''
+    console.log('cookies是')
+    console.log(cookies)
+    /*
+    const response = {
+      success: Cookie.get('user_session') && Cookie.get('user_session') > new Date().getTime(),
+      username: Cookie.get('user_name') || '',
+      message: ''
+    }
+    */
+    return res.send({
+        status: 0,
+        data: '信息填写不全'
+      });
   },
   addUser_auth: async function (req, res) {
     //console.log(req.body);
@@ -332,244 +353,14 @@ var User = {
   },
 
   //添加用户
-  addUser: async function (req, res) {
-    var db_user = new PouchDB(db);
-    console.log(req.body);
-    var username = req.body.username;
-    var password = util.md5(req.body.password);
-    var re_password = util.md5(req.body.re_password);
-    var deviceId = req.body.deviceId;
-    var email = req.body.email;
-    var token = util.guid() + deviceId;
-    if (!username || !password || !re_password || !email) {
-      return res.send({
-        status: 0,
-        data: '信息填写不全'
-      });
-    } else if (password != re_password) {
-      return res.send({
-        status: 0,
-        data: '两次密码不一致'
-      });
-    } else {
-      try {
-        var r_index = await db_user.createIndex({
-          index: {
-            fields: ['username']
-          }
-        });
-
-        console.log(r_index);
-      } catch (err) {
-        console.log(err);
-        return res.send({
-          status: 0,
-          data: '远程建立索引出错'
-        })
-      }
-
-      try {
-        var r_username = await db_user.find({
-          selector: {
-            username: username
-          }
-        })
-        if (r_username['docs'].length > 0) {
-          console.log(r_username);
-          return res.send({
-            status: 0,
-            data: '用户名重复'
-          });
-        } else {
-          try {
-            let time = new Date().toLocaleString();
-            var doc = await db_user.put({
-              _id: email,
-              username: username,
-              email: email,
-              password: password,
-              token: token,
-              reg_time: time,
-              log_time: time,
-            });
-            return res.send({
-              status: 1,
-              data: {
-                username: username,
-                email: email,
-                token: token,
-                reg_time: time,
-                log_time: time,
-              }
-            });
-          } catch (err) {
-            console.log(err);
-
-            return res.send({
-              status: 0,
-              data: '这个邮箱已经被注册使用'
-            });
-          }
-        }
-
-
-      } catch (error) {
-        console.log(error);
-        return res.send({
-          status: 0,
-          data: '后台维护'
-        });
-      }
-
-      /*
-      db_user.allDocs({
-        include_docs: true,
-      }).then(function (r) {
-        //console.log(r['rows'])
-        var checkUsername = function (doc) {
-          return doc['doc']['username'] == username
-        }
-        var checkEmail = function (doc) {
-          return doc['doc']['email'] == email
-        }
-        if (r['rows'].filter(checkEmail).length) {
-          return res.send({
-            status: 0,
-            data: '邮箱已注册'
-          });
-        }else if (r['rows'].filter(checkUsername).length) {
-          return res.send({
-            status: 0,
-            data: '用户名已经被注册'
-          });
-        } else {
-          return db_user.put({
-            _id: email,
-            username: username,
-            email: email,
-            password: password,
-            time: new Date(),
-            token: token
-          }).then(function (r) {
-            //console.log(r)
-            console.log("注册成功")
-            return res.send({
-              status: 1,
-              data: {
-                username: username,
-                email: email,
-                token: token
-              }
-            });
-          }).catch(function (err) {
-            console.log(err)
-            return res.send({
-              status: 0,
-              err: e
-            });
-          })
-        }
-
-      })
-      */
-    }
-    /*
-        db_user.createIndex({
-          index: {
-            fields: ['username','email']
-          }
-        }).then(function(r){
-          console.log(r);
-          return db_user.find({
-            selector:{
-              $and:[
-                {username:username},
-                {email:email}
-              ]
-            }
-          })
-        }).then(function (r) {
-          return res.send({
-              status: 0,
-              data: '邮箱或用户名已经被使用'
-            });
-        }).catch(function (err) {
-          if(err){
-            console.log(err);
-            return db_user.post({
-              username: username,
-              email: email,
-              password: password,
-              time: new Date(),
-              token: ''
-            })
-          }
-        })
-    */
-    /*
-        db_user.createIndex({
-          index: {
-            fields: ['username']
-          }
-        }).then(function (result) {
-          // yo, a result
-          console.log(result)
-          return db_user.find({
-            selector: {
-              username: username
-            }
-          }).then(function (result) {
-            console.log(result['docs'][0]['username']);
-            return res.send({
-              status: 0,
-              data: '用户名已经被注册'
-            });
-          }).catch(function (err) {
-            console.log(err)
-            return db_user.find({
-              selector: {
-                email: email
-              }
-            })
-          }).then(function (result) {
-            console.log(result)
-            //console.log(result['docs'][0]['email']);
-            return res.send({
-              status: 0,
-              data: '已经注册过的邮箱'
-            });
-          }).catch(function (err) {
-            console.log(err)
-            return db_user.post({
-              username: username,
-              email: email,
-              password: password,
-              time: new Date(),
-              token: ''
-            })
-          }).then(function (result) {
-            console.log('ok')
-            return res.send({
-              status: 1,
-              data: {
-                username: username
-              }
-            });
-          }).catch(function (err) {
-            console.log(err)
-            return res.send({
-              status: 0,
-              err: e
-            });
-          })
-        }).catch(function (err) {
-          console.log(err)
-        })
-        
-    */
-  },
-
-  //用户登录
+  addUser:(req,res)=>{
+    require('./users_get_api').addUser(req,res);
+  if (module.hot){
+    module.hot.accept('./users_get_api', function() {
+      require('./users_get_api').addUser(req,res)
+    });
+  }},
+  //用户登录 login users_get_api
   login:(req,res)=>{
     require('./users_get_api').login(req,res);
   if (module.hot){

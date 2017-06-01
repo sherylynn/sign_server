@@ -1,5 +1,6 @@
 var fs = require('fs');
 var util = require('./../util');
+var colors = require('colors');
 var qs = require('qs');
 var acti_PATH = './database/acti.json';
 var PouchDB = require('pouchdb');
@@ -202,7 +203,7 @@ let Sign_Acti_api = {
     } = editItem;
     //console.log(_id)
     try {
-      let doc = await db_acti.get(_id);
+      let acti_doc = await db_acti.get(_id);
       try {
         var r_index = await db_user.createIndex({
           index: {
@@ -226,7 +227,8 @@ let Sign_Acti_api = {
           return res.send({status: 0, success: false, data: '库中没有这个用户', message: '库中没有这个用户'});
         } else {
           let user_doc = r_qrcode['docs'][0]
-          let users_sign_array=JSON.parse(doc.info['参与人员']);
+          let users_sign_array=JSON.parse(acti_doc.info['参与人员']);
+          let actis_sign_array=JSON.parse(user_doc.info['参会']);
           if (users_sign_array.includes(user_doc.username)) {
             //已经有了,返回已经签到不需要多签
             return res.send({
@@ -238,18 +240,29 @@ let Sign_Acti_api = {
               })
           } else {
             users_sign_array.push(user_doc.username)
+            console.log('acti的info'.green)
+            console.log(acti_doc.info)
+            actis_sign_array.push(acti_doc.info["主题"])
             try {
 
               let response = await db_acti.put({
-                ...doc,
+                ...acti_doc,
                 _id: _id,
-                _rev: doc._rev,
+                _rev: acti_doc._rev,
                 info: {
-                  ...doc.info,
+                  ...acti_doc.info,
                   ...info,
                   '参与人员': JSON.stringify(users_sign_array)
                 }
               });
+
+              let res_user= await db_user.put({
+                ...user_doc,
+                info:{
+                  ...user_doc.info,
+                  '参会':JSON.stringify(actis_sign_array)
+                }
+              })
               return res.send({
                 success: true,
                 data: {

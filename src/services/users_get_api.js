@@ -1,5 +1,6 @@
 var fs = require('fs');
 var util = require('./../util');
+var colors =require('colors')
 var qs =require('qs');
 var USER_PATH = './database/user.json';
 var PouchDB = require('pouchdb');
@@ -412,7 +413,7 @@ var User_get = {
         });
       }
     }
-    console.log(doc)
+    //console.log(doc)
     if (doc['password'] == password) {
       let time = new Date().toLocaleString();
       var response = await db_user.put({
@@ -427,10 +428,14 @@ var User_get = {
         maxAge: 900000,
         httpOnly: false,
       })//然而设置的cookies并没有成功,不知道是否跨域问题
+      console.log('传输数据'.red)
+      console.log(doc)
       return res.send({
         status: 1,
         success:true,
         data: {
+          ...doc,
+          password:'',
           email: email,
           username: doc['username'],
           token: token,

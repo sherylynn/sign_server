@@ -18,7 +18,7 @@ module.exports = function(app) {
   */
   //切换成只使用 user.js
   
-  //var service_act=require(REQUIRE_PATH_SERVICES+'activity.js');
+  //var service_act=require(REQUIRE_PATH_SERVICES+'acti.js');
   //service_act.init && service_act.init(app);
   //var service_index=require(REQUIRE_PATH_SERVICES+'index.js');
   //service_index.init && service_index.init(app);
@@ -62,11 +62,18 @@ module.exports = function(app) {
       service_user = require('./services/user.js');
     });
   }
-  let service_activity=require('./services/activity.js');
-  service_activity.init && service_activity.init(app);
+  let service_acti=require('./services/acti.js');
+  service_acti.init && service_acti.init(app);
   if (module.hot){
-    module.hot.accept('./services/activity.js', function() {
-      service_activity = require('./services/activity.js');
+    module.hot.accept('./services/acti.js', function() {
+      service_acti = require('./services/acti.js');
+    });
+  }
+  let service_sign_acti=require('./services/sign_acti.js');
+  service_sign_acti.init && service_sign_acti.init(app);
+  if (module.hot){
+    module.hot.accept('./services/sign_acti.js', function() {
+      service_sign_acti = require('./services/sign_acti.js');
     });
   }
   

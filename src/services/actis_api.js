@@ -49,6 +49,7 @@ let Acti_api = {
         ...obj.doc.info
       }
     })
+    actisListData.data.reverse()
     actisListData.page ={
       total: actisListData.data.length,
       current: 1
@@ -103,6 +104,7 @@ let Acti_api = {
             ...obj.doc.info
           }
         })
+        actisListData.data.reverse()
         actisListData.page ={
           total: actisListData.data.length,
           current: 1
@@ -136,12 +138,14 @@ let Acti_api = {
     //let {actiname,when,where,point,_id,...info}=newData;
     let {_id,...info}=newData;
     let time = new Date().toLocaleString();
+    let time_id =new Date().getTime().toString();
       
     try{
       //更多活动信息还没注入 info内有参会人员和about _id 用什么还没想好
+      //根据alldocs的尿性 _id还是用时间为好 选用put
       //_id 自动生成  db用 post 而不是put
-      let doc = await db_acti.post({
-        //_id: email,
+      let doc = await db_acti.put({
+        _id: time_id,
         /*
         actiname: actiname,
         when:when,
@@ -168,9 +172,10 @@ let Acti_api = {
       actisListData.data =allDocs.rows.map((obj)=>{
         return {
           ...obj.doc,
-          ...obj.doc.info
+          ...obj.doc.info//对数据重复赋值是为了显示方便
         }
       })
+      actisListData.data.reverse();
       actisListData.page ={
         total: actisListData.data.length,
         current: 1
@@ -225,6 +230,7 @@ let Acti_api = {
             ...obj.doc.info
           }
         })
+        actisListData.data.reverse()
         actisListData.page ={
           total: actisListData.data.length,
           current: 1

@@ -63,7 +63,10 @@ var init = {
         "联系电话": users[i]["联系电话"],
         "家庭地址": users[i]["家庭地址"],
         "手机号": users[i]["手机号"],
-        "组别": users[i]["组别"]
+        "组别": users[i]["组别"],
+        "参会":[],
+        "积分":0,
+        "二维码号":API +util.md5_users(users[i]["身份证号"])
       }
       /*
       let info={
@@ -75,12 +78,14 @@ var init = {
 
       //更多个人信息还没注入
       let doc = await db_user.put({
-        _id: email,
+        _id:email,
+        //_id: util.md5_users(users[i]["身份证号"]),//因为react-native上没有加密手段所以不加密以免react登录出错
         username: username,
         email: email,
         password: password,
         token: token,
         info: info,
+        qrcode:API +util.md5_users(users[i]["身份证号"]),
         reg_time: time,
         log_time: time
       });

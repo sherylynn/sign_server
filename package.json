@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node ./build/bundle.js",
-    "build": "./node_modules/.bin/babel src -d routes",
+    "build": "webpack",
+    "build-babel": "./node_modules/.bin/babel src -d routes",
     "dev": "webpack --watch"
   },
   "dependencies": {

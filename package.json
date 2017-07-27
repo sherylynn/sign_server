@@ -44,6 +44,8 @@
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-plugin-transform-strict-mode": "^6.8.0",
     "babel-preset-es2017": "^6.24.1",
+    "eslint": "^4.3.0",
+    "eslint-plugin-react": "^7.1.0",
     "webpack": "^2.2.1",
     "webpack-node-externals": "^1.6.0"
   }
